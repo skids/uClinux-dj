@@ -1,0 +1,73 @@
+
+This is a "sneak preview" release of a bootable uClinux for
+older Coldfire-based HP Deskjet printers.
+
+Currently none of the motors or sensors are supported.  This
+is just a proof-of-concept release.
+
+Currently the only platform tested is the Deskjet 895cxi.
+
+Note that this code is being developed without any documentation
+on the hardware.  The current code does not attempt to drive any 
+motors or devices, but even so there is a small chance it may 
+damage the hardware, and one should be prepared to deal with 
+unexpected movement or possibly even electrical burnouts, even
+when running on the same series the kernel is compiled for,
+since there is no assurance even identically numbered models
+have the exact same components.
+
+That said, there is a chance the binary image may work on a few
+models close to the 895cxi in lineage.  Note that a USB port
+is currently needed for shell access.
+
+
+==================================
+Test-driving the binary image:
+==================================
+
+Required: minicom, srecord, parallel port, usb 1.0 port + gserial.
+
+To boot the binary image, simply attach both the parallel port and
+the USB port, cycle the power on the dj895c with both buttons held down
+until all 3 LEDs come on, and do the following:
+
+modprobe usbserial vendor=0x0525 product=0xA4A6
+sleep 1
+cat image.srec > /dev/lp0
+
+...assuming your parallel port is lp0.  Then run minicom on 
+/dev/ttyUSB0 (assuming you have no other USB serial ports) and wait 
+for a login prompt.
+
+==================================
+Building from source
+==================================
+
+o Apply the patch to dist-20091129
+o make menuconfig; defaults should suffice
+o mkdir romfs
+o make
+o make again to get the romfs into the kernel's ramfs
+o Remember to cycle the printer power and hold the buttons
+o Use the runkernel script from vendors/HP/DJ895c.
+
+==================================
+Parallel console messages
+==================================
+
+There's a read-only hack to see console messages.
+Search for "p1284" in kernel/printk.c, and uncomment
+that line before building.
+
+Build the pphack.c file from inside vendors/HP/DJ895c.
+But first, adjust it to use the IO ports for your parallel 
+port.
+
+Uncomment the line that calls pphack in the runkernel 
+script from vendors/HP/DJ895c.
+
+You must leave the parallel port plugged in or the 
+kernel will halt.
+
+A parallel console usable with ptal-mlcd will hopefully
+be ready by the next preview release.
