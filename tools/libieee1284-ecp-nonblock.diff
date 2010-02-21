@@ -1,0 +1,25 @@
+Only in libieee1284-0.2.11: config.guess
+Only in libieee1284-0.2.11: config.sub
+Only in libieee1284-0.2.11: libieee1284.spec
+diff -r -U2 libieee1284-0.2.11/src/default.c libieee1284-0.2.11-ecp-nonblock/src/default.c
+--- libieee1284-0.2.11/src/default.c	2004-08-09 05:21:05.000000000 -0400
++++ libieee1284-0.2.11-ecp-nonblock/src/default.c	2010-02-21 13:36:42.000000000 -0500
+@@ -656,5 +656,14 @@
+     /* FIXME: Should we impose some sensible limit here? */
+     lookup_delay (TIMEVAL_SIGNAL_TIMEOUT, &tv);
+-    while(fn->wait_status (port, S1284_NACK, 0, &tv)) { } 
++    while(1) {
++      int ret;
++      ret = fn->wait_status (port, S1284_NACK, 0, &tv);
++      if (!ret) break;
++      if ((ret == E1284_TIMEDOUT) && (flags & F1284_NONBLOCK)) {
++	debugprintf ("ECP read timed out at 43\n");
++	port->current_phase = PH1284_REV_IDLE;
++	return count;
++      }
++    } 
+ 
+     /* Is this a command? */
+Only in libieee1284-0.2.11-ecp-nonblock/tests: dj
+Only in libieee1284-0.2.11-ecp-nonblock/tests: dj.c
+Only in libieee1284-0.2.11-ecp-nonblock/tests: ieeetest
